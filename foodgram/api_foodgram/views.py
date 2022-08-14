@@ -1,9 +1,12 @@
+import io
+
 from django.db.models import Sum
 from django.db.models.expressions import Exists, OuterRef, Value
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Favorite, Ingredients, Recipes, ShoppingCart, Tags
+from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
@@ -121,6 +124,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer)
+        x_position = 50
+        y_position = 800
         shopping_cart = ShoppingCart.objects.all().filter(
             user=self.request.user
         ).select_related('shopping_recipes')
@@ -128,15 +135,22 @@ class RecipesViewSet(viewsets.ModelViewSet):
             shopping_cart.values(self.path_name, self.path_measurement_unit)
             .order_by(self.path_name).annotate(total=Sum(self.path_amount))
         )
-        data = ''
+        indent = 20
+        p.drawString(x_position, y_position, 'Cписок покупок:')
         for ingredient in ingredients:
-            data += (
+            p.drawString(
+                x_position, y_position - indent,
                 f'{ingredient[self.path_name]}'
                 f' ({ingredient[self.path_measurement_unit]})'
-                f' — {ingredient["total"]}\r\n'
-            )
+                f' — {ingredient["total"]}\r\n')
+            y_position -= 15
+            if y_position <= 50:
+                p.showPage()
+                y_position = 800
+        p.save()
+        buffer.seek(0)
         return FileResponse(
-            data, as_attachment=True, filename='FILENAME.txt'
+            buffer, as_attachment=True, filename='shopping_cart.pdf'
         )
 
 

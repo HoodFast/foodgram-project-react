@@ -1,8 +1,9 @@
 from django.contrib.auth.hashers import make_password
-from rest_framework import serializers
-from users.models import User, Subscription
-from recipes.models import Recipes
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+
+from recipes.models import Recipes
+from users.models import Subscription, User
 
 
 class UserSerializer(serializers.ModelSerializer):

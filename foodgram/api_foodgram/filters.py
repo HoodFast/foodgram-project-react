@@ -1,6 +1,5 @@
-import django_filters 
-from django.db.models import IntegerField, Value
-from recipes.models import Recipes, Ingredients
+import django_filters
+from recipes.models import Ingredients, Recipes
 
 
 class IngredientSearchFilter(django_filters.FilterSet):

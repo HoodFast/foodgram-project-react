@@ -1,15 +1,9 @@
-from rest_framework import serializers
-from users.serializers import UserSerializer, RecipeShortSerializer
-from recipes.models import (
-    Tags,
-    Ingredients,
-    Recipes,
-    CountIngredients,
-    Favorite,
-    ShoppingCart
-)
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (CountIngredients, Favorite, Ingredients, Recipes,
+                            ShoppingCart, Tags)
+from rest_framework import serializers
+from users.serializers import RecipeShortSerializer, UserSerializer
 
 
 class IngredientsSerializer(serializers.ModelSerializer):

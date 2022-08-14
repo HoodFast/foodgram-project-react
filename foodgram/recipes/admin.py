@@ -1,15 +1,12 @@
 from django.contrib import admin
-from .models import (
-    Recipes,
-    Ingredients,
-    Tags,
-    Favorite,
-    CountIngredients,
-    ShoppingCart
-    )
-from users.models import User, Subscription
-from users.forms import PasswordChangeForm, CustomUserCreationForm
 from django.contrib.auth.admin import UserAdmin
+
+from users.forms import CustomUserCreationForm, PasswordChangeForm
+from users.models import Subscription, User
+
+from .models import (CountIngredients, Favorite, Ingredients, Recipes,
+                     ShoppingCart, Tags)
+
 
 @admin.register(ShoppingCart)
 class ShoppingCart(admin.ModelAdmin):

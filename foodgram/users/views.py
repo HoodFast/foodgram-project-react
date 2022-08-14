@@ -1,16 +1,14 @@
-from rest_framework import viewsets, generics, status
-from users.models import User, Subscription
-from .serializers import (
-    UserSerializer,
-    CreateUserSerializer,
-    PasswordChangeSerializer,
-    SubscriptionSerializer,
-    SubscriptionCreateSerializer
-)
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny,  SAFE_METHODS
 from django.shortcuts import get_object_or_404
+from rest_framework import generics, status, viewsets
+from rest_framework.permissions import SAFE_METHODS, AllowAny
+from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
+
+from users.models import Subscription, User
+
+from .serializers import (CreateUserSerializer, PasswordChangeSerializer,
+                          SubscriptionCreateSerializer, SubscriptionSerializer,
+                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):

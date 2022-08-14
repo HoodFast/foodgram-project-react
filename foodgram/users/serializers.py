@@ -1,8 +1,8 @@
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from recipes.models import Recipes
 from rest_framework import serializers
 
-from recipes.models import Recipes
 from users.models import Subscription, User
 
 
@@ -66,9 +66,9 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         id_author = self.context['view'].kwargs['pk']
         author = get_object_or_404(
-                User,
-                pk=id_author
-            )
+            User,
+            pk=id_author
+        )
         user = self.context['request'].user
         if author == user:
             raise serializers.ValidationError(
@@ -81,9 +81,9 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         id_author = self.context['view'].kwargs['pk']
         author = get_object_or_404(
-                User,
-                pk=id_author
-            )
+            User,
+            pk=id_author
+        )
         user = self.context['request'].user
         return Subscription.objects.create(user=user, author=author)
 
@@ -109,4 +109,3 @@ class PasswordChangeSerializer(serializers.Serializer):
     model = User
     current_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
-

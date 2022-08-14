@@ -1,9 +1,8 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
-
 from users.models import Subscription, User
 
 from .serializers import (CreateUserSerializer, PasswordChangeSerializer,
@@ -35,8 +34,7 @@ class ChangePasswordView(viewsets.ModelViewSet):
     model = User
 
     def get_object(self):
-        obj = self.request.user
-        return obj
+        return self.request.user
 
     def update(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -58,8 +56,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     """Подписка на автора"""
 
     def get_queryset(self):
-        queryset = User.objects.filter(subs__user=self.request.user)
-        return queryset
+        return User.objects.filter(subs__user=self.request.user)
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -68,13 +65,13 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance, pk):
         author = get_object_or_404(
-                User,
-                pk=pk
-            )
+            User,
+            pk=pk
+        )
         object = get_object_or_404(
-                Subscription,
-                author=author,
-                user=self.request.user
-            )
+            Subscription,
+            author=author,
+            user=self.request.user
+        )
         object.delete()
         return Response(status=HTTP_204_NO_CONTENT)

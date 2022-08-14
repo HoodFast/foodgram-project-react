@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (CountIngredients, Favorite, Ingredients, Recipes,
                             ShoppingCart, Tags)
-from rest_framework import serializers
 from users.serializers import RecipeShortSerializer, UserSerializer
 
 
@@ -64,9 +65,9 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        if ( 
-            user.is_authenticated and
-            Favorite.objects.filter(favorites_recipes=obj.id, user=user)
+        if (
+            user.is_authenticated
+            and Favorite.objects.filter(favorites_recipes=obj.id, user=user)
         ):
             return True
         return False
@@ -74,8 +75,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
         if (
-            user.is_authenticated and
-            ShoppingCart.objects.filter(shopping_recipes=obj, user=user)
+            user.is_authenticated
+            and ShoppingCart.objects.filter(shopping_recipes=obj, user=user)
         ):
             return True
         return False

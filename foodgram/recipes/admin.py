@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
 from users.forms import CustomUserCreationForm, PasswordChangeForm
 from users.models import Subscription, User
 
@@ -12,13 +11,20 @@ from .models import (CountIngredients, Favorite, Ingredients, Recipes,
 class ShoppingCart(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
+
 @admin.register(User)
 class UserAdmin(UserAdmin):
     form = PasswordChangeForm
     add_form = CustomUserCreationForm
     list_filter = ('email', 'username')
     fieldsets = (
-        (None, {'fields': ('email', 'username', 'first_name', 'last_name', 'password',)}),
+        (None, {'fields': (
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        )}),
         ('Permissions', {'fields': ('role',)})
     )
     add_fieldsets = (
@@ -63,6 +69,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
+
 
 @admin.register(CountIngredients)
 class CountIngridientsAdmin(admin.ModelAdmin):

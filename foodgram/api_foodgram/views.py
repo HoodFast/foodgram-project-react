@@ -97,7 +97,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['POST', 'DELETE'],
-        permission_classes=[IsAuthenticatedOrReadOnly, ]
+        permission_classes=[IsAuthenticatedOrReadOnly, ],
+        url_path='shopping_cart'
     )
     def shopping_cart(self, request, pk):
         return self.favorite_and_sopping_cart(

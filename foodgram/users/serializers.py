@@ -1,8 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from recipes.models import Recipe
 from rest_framework import serializers
-
-from recipes.models import Recipes
 from users.models import Subscription, User
 
 
@@ -23,16 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        if (user.is_authenticated and obj.subs.filter(user=user).exists()):
-            return True
-        else:
-            return False
-
-    def create(self, validated_data):
-        validated_data['password'] = (
-            make_password(validated_data.pop('password'))
-        )
-        return super().create(validated_data)
+        return (user.is_authenticated and obj.subs.filter(user=user).exists())
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -90,7 +80,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
 
 class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Recipes
+        model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time',)
 
 

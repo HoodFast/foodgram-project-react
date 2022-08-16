@@ -1,9 +1,8 @@
 from django.db import models
-
 from users.models import User
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
         'name',
         unique=True,
@@ -22,23 +21,29 @@ class Ingredients(models.Model):
         return f'{self.name}'
 
 
-class CountIngredients(models.Model):
+class CountIngredient(models.Model):
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='count_ingredients'
     )
-    amount = models.FloatField('Колличество')
+    amount = models.PositiveIntegerField('Колличество')
 
     class Meta:
-        verbose_name = 'Колличество ингридиента в рецепте'
-        verbose_name_plural = 'Колличество ингридиента в рецепте'
+        verbose_name = 'Колличество ингредиента в рецепте'
+        verbose_name_plural = 'Колличество ингредиента в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'amount'],
+                name='unique_ingredient'
+            )
+        ]
 
     def __str__(self):
         return f'{self.ingredient}'
 
 
-class Tags(models.Model):
+class Tag(models.Model):
     name = models.CharField(
         'name',
         unique=True,
@@ -63,10 +68,10 @@ class Tags(models.Model):
         return f'{self.name}'
 
 
-class Recipes(models.Model):
+class Recipe(models.Model):
     """Модель для рецептов"""
     tags = models.ManyToManyField(
-        Tags,
+        Tag,
         related_name='recipes',
     )
     author = models.ForeignKey(
@@ -75,7 +80,7 @@ class Recipes(models.Model):
         related_name='recipes'
     )
     ingredients = models.ManyToManyField(
-        CountIngredients,
+        CountIngredient,
         related_name='recipes',
     )
     name = models.CharField(
@@ -101,17 +106,23 @@ class Favorite(models.Model):
         on_delete=models.CASCADE,
         related_name='favorites'
     )
-    favorites_recipes = models.ForeignKey(
-        Recipes,
+    recipe = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE,
         related_name='favorites')
 
     class Meta:
         verbose_name = 'Подписка на рецепт'
         verbose_name_plural = 'Подписка на рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_recipe'
+            )
+        ]
 
     def __str__(self):
-        return f'{self.favorites_recipes}, {self.user}'
+        return f'{self.recipe}, {self.user}'
 
 
 class ShoppingCart(models.Model):
@@ -120,14 +131,20 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name='shopping_cart'
     )
-    shopping_recipes = models.ForeignKey(
-        Recipes,
+    recipe = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE,
         related_name='shopping_cart')
 
     class Meta:
         verbose_name = 'Рецепты в избранном'
         verbose_name_plural = 'Рецепты в избранном'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shopping_recipe'
+            )
+        ]
 
     def __str__(self):
-        return f'{self.shopping_recipes}, {self.user}'
+        return f'{self.recipe}, {self.user}'

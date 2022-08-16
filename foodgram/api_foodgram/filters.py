@@ -1,12 +1,12 @@
 import django_filters
-from recipes.models import Ingredients, Recipes
+from recipes.models import Ingredient, Recipe
 
 
 class IngredientSearchFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr='istartswith')
 
     class Meta:
-        model = Ingredients
+        model = Ingredient
         fields = ('name',)
 
 
@@ -19,13 +19,16 @@ class RecipeFilter(django_filters.FilterSet):
     is_in_shopping_cart = django_filters.NumberFilter(method='filter')
 
     class Meta:
-        model = Recipes
+        model = Recipe
         fields = ['author', 'tags', 'is_in_shopping_cart', 'is_favorited']
 
     def filter(self, queryset, name, value):
-        value = True if value == 1 else False
-        recipe_ids = [
-            recipe.pk for recipe in queryset if getattr(recipe, name) == value]
-        if recipe_ids:
-            return queryset.filter(pk__in=recipe_ids)
+        if name == 'is_favorited':
+            recipes = (queryset.values_list(
+                'id', flat=True).filter(is_favorited__startswith=value))
+        elif name == 'is_in_shopping_cart':
+            recipes = (queryset.values_list(
+                'id', flat=True).filter(is_in_shopping_cart__startswith=value))
+        if recipes:
+            return queryset.filter(pk__in=recipes)
         return queryset.none()

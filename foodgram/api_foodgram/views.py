@@ -5,7 +5,7 @@ from django.db.models.expressions import Exists, OuterRef, Value
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Favorite, Ingredients, Recipes, ShoppingCart, Tags
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -21,36 +21,36 @@ from .serializers import (FavoriteSerializer, IngredientsSerializer,
 
 
 class TagsViewSet(viewsets.ModelViewSet):
-    queryset = Tags.objects.all()
+    queryset = Tag.objects.all()
     filter_class = RecipeFilter
     pagination_class = None
     serializer_class = TagsSerializer
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    path_name = 'shopping_recipes__ingredients__ingredient__name'
+    path_name = 'recipe__ingredients__ingredient__name'
     path_measurement_unit = (
-        'shopping_recipes__ingredients__ingredient__measurement_unit'
+        'recipe__ingredients__ingredient__measurement_unit'
     )
-    path_amount = 'shopping_recipes__ingredients__amount'
+    path_amount = 'recipe__ingredients__amount'
     filterset_class = RecipeFilter
     filter_backends = [DjangoFilterBackend, ]
-    queryset = Recipes.objects.all()
+    queryset = Recipe.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = [AuthorOrReadOnly, ]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            return Recipes.objects.annotate(
+            return Recipe.objects.annotate(
                 is_favorited=Exists(Favorite.objects.filter(
-                    user=user, favorites_recipes=OuterRef('id'))
+                    user=user, recipe=OuterRef('id'))
                 ),
                 is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
-                    user=user, shopping_recipes=OuterRef('id'))
+                    user=user, recipe=OuterRef('id'))
                 )).select_related('author', )
         else:
-            return Recipes.objects.annotate(
+            return Recipe.objects.annotate(
                 is_favorited=Value(False), is_in_shopping_cart=Value(False))
 
     def get_serializer_class(self):
@@ -61,29 +61,21 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True,
-        methods=['POST', 'DELETE'],
-        permission_classes=[IsAuthenticatedOrReadOnly],
-        url_path='favorite'
-    )
-    def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
+    def favorite_and_sopping_cart(self, request, pk, model, serializer):
+        recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         if request.method == 'POST':
-            favorite_recipe, created = Favorite.objects.get_or_create(
-                user=user, favorites_recipes=recipe
+            model.objects.get_or_create(
+                user=user, recipe=recipe
             )
-            if created is True:
-                serializer = FavoriteSerializer()
-                return Response(
-                    serializer.to_representation(instance=favorite_recipe),
-                    status=status.HTTP_201_CREATED
-                )
+            return Response(
+                serializer.to_representation(instance=recipe),
+                status=status.HTTP_201_CREATED
+            )
         if request.method == 'DELETE':
-            Favorite.objects.filter(
+            model.objects.filter(
                 user=user,
-                favorites_recipes=recipe
+                recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -91,31 +83,29 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticatedOrReadOnly],
+        url_path='favorite'
+    )
+    def favorite(self, request, pk):
+        return self.favorite_and_sopping_cart(
+            request,
+            pk,
+            model=Favorite,
+            serializer=FavoriteSerializer()
+        )
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly, ]
     )
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
-        user = request.user
-        if request.method == 'POST':
-            recipe, created = ShoppingCart.objects.get_or_create(
-                user=user, shopping_recipes=recipe
-            )
-            if created is True:
-                serializer = ShoppingCartSerializer()
-                return Response(
-                    serializer.to_representation(instance=recipe),
-                    status=status.HTTP_201_CREATED
-                )
-            return Response(
-                {'errors': 'Рецепт уже в корзине покупок'},
-                status=status.HTTP_201_CREATED
-            )
-        if request.method == 'DELETE':
-            ShoppingCart.objects.filter(
-                user=user, shopping_recipes=recipe
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return self.favorite_and_sopping_cart(
+            request,
+            pk,
+            model=ShoppingCart,
+            serializer=ShoppingCartSerializer()
+        )
 
     @action(
         detail=False,
@@ -128,16 +118,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
         p = canvas.Canvas(buffer)
         x_position = 50
         y_position = 800
-        shopping_cart = ShoppingCart.objects.all().filter(
-            user=self.request.user
-        ).select_related('shopping_recipes')
-        ingredients = (
-            shopping_cart.values(self.path_name, self.path_measurement_unit)
-            .order_by(self.path_name).annotate(total=Sum(self.path_amount))
+        shopping_cart = (
+            request.user.shopping_cart.
+            values(
+                self.path_name,
+                self.path_measurement_unit
+            ).annotate(total=Sum(self.path_amount)).order_by()
         )
         indent = 20
         p.drawString(x_position, y_position, 'Cписок покупок:')
-        for ingredient in ingredients:
+        for ingredient in shopping_cart:
             p.drawString(
                 x_position, y_position - indent,
                 f'{ingredient[self.path_name]}'
@@ -155,7 +145,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     pagination_class = None
     serializer_class = IngredientsSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]

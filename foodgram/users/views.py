@@ -40,16 +40,16 @@ class ChangePasswordView(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         self.object = self.get_object()
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            if not self.object.check_password(
-                serializer.data.get("current_password")
-            ):
-                return Response(
-                    {"current_password": ["Wrong password."]},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
+        serializer.is_valid(raise_exception=True)
+        if not self.object.check_password(
+            serializer.validated_data.get("current_password")
+        ):
+            return Response(
+                {"current_password": ["Wrong password."]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        self.object.set_password(serializer.validated_data.get("new_password"))
+        self.object.save()
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -69,10 +69,10 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
             User,
             pk=pk
         )
-        object = get_object_or_404(
+        obj = get_object_or_404(
             Subscription,
             author=author,
             user=self.request.user
         )
-        object.delete()
+        obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)

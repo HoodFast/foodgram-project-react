@@ -4,8 +4,8 @@ from django.contrib.auth.admin import UserAdmin
 from users.forms import CustomUserCreationForm, PasswordChangeForm
 from users.models import Subscription, User
 
-from .models import (CountIngredients, Favorite, Ingredients, Recipes,
-                     ShoppingCart, Tags)
+from .models import (CountIngredient, Favorite, Ingredient, Recipe,
+                     ShoppingCart, Tag)
 
 
 @admin.register(ShoppingCart)
@@ -41,7 +41,7 @@ class UserAdmin(UserAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(Recipes)
+@admin.register(Recipe)
 class RecipesAdmin(admin.ModelAdmin):
     list_filter = ('name', 'author', 'tags',)
     readonly_fields = ('added_in_favorites',)
@@ -51,13 +51,13 @@ class RecipesAdmin(admin.ModelAdmin):
         return obj.favorites.count()
 
 
-@admin.register(Ingredients)
+@admin.register(Ingredient)
 class IngridientsAdmin(admin.ModelAdmin):
     list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
-@admin.register(Tags)
+@admin.register(Tag)
 class TagsAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
@@ -72,6 +72,6 @@ class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(CountIngredients)
+@admin.register(CountIngredient)
 class CountIngridientsAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'

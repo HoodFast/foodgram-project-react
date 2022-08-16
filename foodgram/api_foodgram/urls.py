@@ -17,8 +17,12 @@ urlpatterns = [
         {'post': 'update'}), name='set_password'
     ),
     path('', include('djoser.urls.authtoken')),
-    path('users/subscriptions/', SubscriptionViewSet.as_view({'get': 'list'})),
+    path('users/subscriptions/', SubscriptionViewSet.as_view(
+        {'get': 'list'}), name='subscriptions'
+    ),
     path('users/<int:pk>/subscribe/', SubscriptionViewSet.as_view(
-        {'post': 'create', 'delete': 'perform_destroy'})),
+        {'post': 'create', 'delete': 'perform_destroy'}),
+        name='subscribe'
+    ),
     path('', include(router.urls)),
 ]

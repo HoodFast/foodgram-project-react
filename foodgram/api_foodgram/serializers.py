@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (CountIngredient, Favorite, Ingredient, Recipe,
                             ShoppingCart, Tag)
-from rest_framework import serializers
 from users.serializers import RecipeShortSerializer, UserSerializer
 
 
@@ -125,13 +126,26 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return tags
 
     def create_ingredients(self, ingredients, recipe):
+        obj = []
         for ingredient in ingredients:
             ingredient_obj = get_object_or_404(Ingredient, pk=ingredient['id'])
-            item, create = CountIngredient.objects.get_or_create(
+            item = CountIngredient(
                 ingredient=ingredient_obj,
                 amount=ingredient['amount']
             )
-            recipe.ingredients.add(item)
+            if CountIngredient.objects.filter(
+                ingredient=ingredient_obj, amount=ingredient['amount']
+            ).exists():
+                item_get = CountIngredient.objects.get(
+                    ingredient=ingredient_obj, amount=ingredient['amount']
+                )
+                recipe.ingredients.add(item_get)
+            else:
+                obj.append(item)
+            if obj:
+                builk_obj = CountIngredient.objects.bulk_create(obj)
+                for i in builk_obj:
+                    recipe.ingredients.add(i)
         return recipe
 
     def create(self, validated_data):
@@ -143,6 +157,10 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        instance.name = validated_data.pop('name')
+        instance.image = validated_data.pop('image')
+        instance.text = validated_data.pop('text')
+        instance.cooking_time = validated_data.pop('cooking_time')
         if 'tags' in validated_data:
             instance.tags.clear()
             tags = validated_data.pop('tags')

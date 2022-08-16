@@ -119,16 +119,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
         p = canvas.Canvas(buffer)
         x_position = 50
         y_position = 800
-        shopping_cart = (
-            request.user.shopping_cart.
-            values(
-                self.path_name,
-                self.path_measurement_unit
-            ).annotate(total=Sum(self.path_amount)).order_by()
+        shopping_cart = ShoppingCart.objects.all().filter(
+            user=self.request.user
+        ).select_related('recipe')
+        ingredients = (
+            shopping_cart.values(self.path_name, self.path_measurement_unit)
+            .order_by(self.path_name).annotate(total=Sum(self.path_amount))
         )
         indent = 20
         p.drawString(x_position, y_position, 'Cписок покупок:')
-        for ingredient in shopping_cart:
+        for ingredient in ingredients:
             p.drawString(
                 x_position, y_position - indent,
                 f'{ingredient[self.path_name]}'

@@ -125,31 +125,13 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         return tags
 
     def create_ingredients(self, ingredients, recipe):
-        obj = []
         for ingredient in ingredients:
             ingredient_obj = get_object_or_404(Ingredient, pk=ingredient['id'])
-            exist = CountIngredient.objects.filter(
+            item, create = CountIngredient.objects.get_or_create(
                 ingredient=ingredient_obj,
                 amount=ingredient['amount']
-            ).exists()
-            if exist:
-                item = CountIngredient.objects.get(
-                    ingredient=ingredient_obj,
-                    amount=ingredient['amount']
-                )
-                recipe.ingredients.add(item)
-            else:
-                item = CountIngredient(
-                    ingredient=ingredient_obj,
-                    amount=ingredient['amount']
-                )
-                obj.append(item)
-        if obj:
-            bulk_items = CountIngredient.objects.bulk_create(obj)
-            # как то bulk_create скорее усложнил код,
-            # либо я не понял как им пользоваться
-            for i in bulk_items:
-                recipe.ingredients.add(i)
+            )
+            recipe.ingredients.add(item)
         return recipe
 
     def create(self, validated_data):

@@ -146,7 +146,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
                 obj.append(item)
         if obj:
             bulk_items = CountIngredient.objects.bulk_create(obj)
-            # как то bulk_create скорее усложнил код, 
+            # как то bulk_create скорее усложнил код,
             # либо я не понял как им пользоваться
             for i in bulk_items:
                 recipe.ingredients.add(i)

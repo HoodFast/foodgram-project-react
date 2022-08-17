@@ -15,33 +15,11 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return f'{self.name}'
-
-
-class CountIngredient(models.Model):
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        related_name='count_ingredients'
-    )
-    amount = models.PositiveIntegerField('Колличество')
-
-    class Meta:
-        verbose_name = 'Колличество ингредиента в рецепте'
-        verbose_name_plural = 'Колличество ингредиента в рецепте'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['ingredient', 'amount'],
-                name='unique_ingredient'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.ingredient}'
 
 
 class Tag(models.Model):
@@ -81,8 +59,9 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     ingredients = models.ManyToManyField(
-        CountIngredient,
+        Ingredient,
         related_name='recipes',
+        through='CountIngredient'
     )
     name = models.CharField(
         'name',
@@ -99,6 +78,33 @@ class Recipe(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+
+
+class CountIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт'
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='count_ingredients'
+    )
+    amount = models.PositiveIntegerField('Колличество')
+
+    class Meta:
+        verbose_name = 'Колличество ингредиента в рецепте'
+        verbose_name_plural = 'Колличество ингредиента в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredient'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.ingredient}'
 
 
 class Favorite(models.Model):

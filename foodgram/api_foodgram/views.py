@@ -28,11 +28,11 @@ class TagsViewSet(viewsets.ModelViewSet):
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    path_name = 'recipe__ingredients__ingredient__name'
+    path_name = 'recipe__ingredients__name'
     path_measurement_unit = (
-        'recipe__ingredients__ingredient__measurement_unit'
+        'recipe__ingredients__measurement_unit'
     )
-    path_amount = 'recipe__ingredients__amount'
+    path_amount = 'recipe__countingredient__amount'
     filterset_class = RecipeFilter
     filter_backends = [DjangoFilterBackend, ]
     queryset = Recipe.objects.all()
@@ -48,7 +48,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 ),
                 is_in_shopping_cart=Exists(ShoppingCart.objects.filter(
                     user=user, recipe=OuterRef('id'))
-                )).select_related('author', )
+                )
+            ).select_related('author', )
         else:
             return Recipe.objects.annotate(
                 is_favorited=Value(False), is_in_shopping_cart=Value(False))
@@ -119,11 +120,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
         p = canvas.Canvas(buffer)
         x_position = 50
         y_position = 800
-        shopping_cart = ShoppingCart.objects.all().filter(
-            user=self.request.user
-        ).select_related('recipe')
         ingredients = (
-            shopping_cart.values(self.path_name, self.path_measurement_unit)
+            request.user.shopping_cart.values(
+                self.path_name,
+                self.path_measurement_unit)
             .order_by(self.path_name).annotate(total=Sum(self.path_amount))
         )
         indent = 20

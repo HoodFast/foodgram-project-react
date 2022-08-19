@@ -16,20 +16,11 @@ class RecipeFilter(django_filters.FilterSet):
         field_name='tags__slug',
     )
     author = django_filters.CharFilter()
-    is_favorited = django_filters.BooleanFilter(method='filter')
-    is_in_shopping_cart = django_filters.BooleanFilter(method='filter')
+    is_in_shopping_cart = django_filters.BooleanFilter(
+        widget=django_filters.widgets.BooleanWidget())
+    is_favorited = django_filters.BooleanFilter(
+        widget=django_filters.widgets.BooleanWidget())
 
     class Meta:
         model = Recipe
         fields = ['author', 'tags', 'is_in_shopping_cart', 'is_favorited']
-
-    def filter(self, queryset, name, value):
-        if name == 'is_favorited':
-            recipes = (queryset.values_list(
-                'id', flat=True).filter(is_favorited__startswith=value))
-        elif name == 'is_in_shopping_cart':
-            recipes = (queryset.values_list(
-                'id', flat=True).filter(is_in_shopping_cart__startswith=value))
-        if recipes:
-            return queryset.filter(pk__in=recipes)
-        return queryset.none()

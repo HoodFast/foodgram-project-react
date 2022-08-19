@@ -7,7 +7,7 @@ class UserManager(BaseUserManager):
         if not username:
             raise ValueError('Юзернейм не может быть пустым!')
         if not email:
-            raise ValueError('Почта не может быть пустой!')
+            raise ValueError('Почта не  может быть пустой!')
         email = self.normalize_email(email)
         user = self.model(email=email, username=username, **extra_fields)
         user.password = make_password(password)

@@ -98,7 +98,7 @@ class CountIngredient(models.Model):
         verbose_name_plural = 'Колличество ингредиента в рецепте'
         constraints = [
             models.UniqueConstraint(
-                fields=['ingredient', 'amount'],
+                fields=['ingredient', 'recipe'],
                 name='unique_ingredient'
             )
         ]

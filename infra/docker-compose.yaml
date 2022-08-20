@@ -9,7 +9,7 @@ services:
       - ./.env
 
   backend:
-    image: holistic1/foodgram_back:latest
+    image: holistic1/foodgram_back:v1
     restart: always
     volumes:
       - data_value:/app/data/

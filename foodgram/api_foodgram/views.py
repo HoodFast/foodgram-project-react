@@ -6,6 +6,8 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
@@ -117,7 +119,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         buffer = io.BytesIO()
-        p = canvas.Canvas(buffer)
+        page = canvas.Canvas(buffer)
+        pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
         x_position = 50
         y_position = 800
         ingredients = (
@@ -126,19 +129,20 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 self.path_measurement_unit)
             .order_by(self.path_name).annotate(total=Sum(self.path_amount))
         )
+        page.setFont('Vera', 12)
         indent = 20
-        p.drawString(x_position, y_position, 'Cписок покупок:')
+        page.drawString(x_position, y_position, 'Cписок покупок:')
         for ingredient in ingredients:
-            p.drawString(
+            page.drawString(
                 x_position, y_position - indent,
                 f'{ingredient[self.path_name]}'
                 f' ({ingredient[self.path_measurement_unit]})'
                 f' — {ingredient["total"]}\r\n')
             y_position -= 15
             if y_position <= 50:
-                p.showPage()
+                page.showPage()
                 y_position = 800
-        p.save()
+        page.save()
         buffer.seek(0)
         return FileResponse(
             buffer, as_attachment=True, filename='shopping_cart.pdf'

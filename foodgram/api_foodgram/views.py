@@ -120,7 +120,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         buffer = io.BytesIO()
         page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+        pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
+        page.setFont('DejaVuSans', 12)
         x_position = 50
         y_position = 800
         ingredients = (
@@ -129,7 +130,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 self.path_measurement_unit)
             .order_by(self.path_name).annotate(total=Sum(self.path_amount))
         )
-        page.setFont('Vera', 12)
         indent = 20
         page.drawString(x_position, y_position, 'Cписок покупок:')
         for ingredient in ingredients:
@@ -142,6 +142,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             if y_position <= 50:
                 page.showPage()
                 y_position = 800
+        page.setFont('DejaVuSans', 12)
         page.save()
         buffer.seek(0)
         return FileResponse(

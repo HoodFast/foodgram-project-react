@@ -5,4 +5,6 @@
 
 #### Документация доступна по адресу http://51.250.107.11/api/docs/
 
-## логин и пароль superuser - mail: user@mail.ru , pass: 1234
+##### логин и пароль superuser - 
+######      mail: user@mail.ru
+######      pass: 1234

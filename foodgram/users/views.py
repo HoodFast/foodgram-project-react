@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from users.models import Subscription, User
+from api_foodgram.pagination import CustomPagination
 from .serializers import (CreateUserSerializer, PasswordChangeSerializer,
                           SubscriptionCreateSerializer, SubscriptionSerializer,
                           UserSerializer)
@@ -14,6 +15,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """Viewset для модели  User."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -54,6 +56,7 @@ class ChangePasswordView(viewsets.ModelViewSet):
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     """Подписка на автора"""
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         return User.objects.filter(subs__user=self.request.user)

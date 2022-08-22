@@ -13,19 +13,40 @@ Foodgram приложение для публикации рецептов. По
 
 ## Для запуска проекта необходимо:
 
-#### 1.Создать Fork и склонировать репозиторий на локальную машину:
+#### Создать Fork и склонировать репозиторий на локальную машину:
 
 #### 2. Отредактировать файл infra/nginx/default.conf
+- отредактируйте файл infra/nginx/default.conf
+- в строке server_name необходимо вписать 127.0.0.1
 
+Cоздайте .env файл в папке проекта:
+
+    ```
+    DB_ENGINE=<django.db.backends.postgresql>
+    DB_NAME=<имя базы данных postgres>
+    DB_USER=<пользователь бд>
+    DB_PASSWORD=<пароль>
+    DB_HOST=<db>
+    DB_PORT=<5432>
+    SECRET_KEY=<секретный ключ> 
+    ```
+для запуска локально находясь в /infra выполните команду:
+
+    ```
+    docker-compose up
+    ```
+
+
+#### 3. Для запуска на удаленном сервере:
+- оредактируйте файл infra/nginx/default.conf
 - в строке server_name необходимо вписать IP своего сервера
-
-#### 3. Подготовить удаленный сервер:
 
 - Установите на сервер docker и docker-compose
 - Скопируйте файлы docker-compose.yml и default.conf из директории infra и infra/nginx на сервер
 
 
 Cоздайте на сервере .env файл:
+
     ```
     DB_ENGINE=<django.db.backends.postgresql>
     DB_NAME=<имя базы данных postgres>
@@ -36,6 +57,7 @@ Cоздайте на сервере .env файл:
     SECRET_KEY=<секретный ключ> 
     ```
 Добавьте в Secrets GitHub переменные:
+
     ```
     DB_ENGINE=<django.db.backends.postgresql>
     DB_NAME=<имя базы данных postgres>
@@ -75,3 +97,5 @@ Cоздайте на сервере .env файл:
     ```
     sudo docker-compose exec backend python manage.py createsuperuser
     ```
+
+#### Автор Андрей Кузнецов

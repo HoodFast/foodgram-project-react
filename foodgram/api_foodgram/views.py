@@ -17,7 +17,6 @@ from rest_framework.response import Response
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from .filters import IngredientSearchFilter, RecipeFilter
 from .permissions import AuthorOrReadOnly
-from .pagination import RecipePagination
 from .serializers import (FavoriteSerializer, IngredientsSerializer,
                           RecipesCreateSerializer, RecipesSerializer,
                           ShoppingCartSerializer, TagsSerializer)
@@ -41,7 +40,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = [AuthorOrReadOnly, ]
-    pagination_class = RecipePagination
 
     def get_queryset(self):
         user = self.request.user
@@ -103,6 +101,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly, ],
+        pagination_class=None,
         url_path='shopping_cart'
     )
     def shopping_cart(self, request, pk):

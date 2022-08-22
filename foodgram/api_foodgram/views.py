@@ -101,7 +101,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['POST', 'DELETE'],
+        methods=['GET', 'POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly, ],
         pagination_class=None,
         url_path='shopping_cart'

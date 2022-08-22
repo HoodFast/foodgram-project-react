@@ -8,12 +8,14 @@ from users.models import Subscription, User
 from .serializers import (CreateUserSerializer, PasswordChangeSerializer,
                           SubscriptionCreateSerializer, SubscriptionSerializer,
                           UserSerializer)
+from api_foodgram.pagination import RecipePagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """Viewset для модели  User."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = RecipePagination
 
     def get_serializer_class(self):
         if self.action == 'create':

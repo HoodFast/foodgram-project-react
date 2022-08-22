@@ -128,6 +128,11 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         if not ingredients:
             raise serializers.ValidationError(
                 'Укажите хотя бы один ингредиент')
+        for ingredient in ingredients:
+            if int(ingredient.get('amount')) < 1:
+                raise serializers.ValidationError(
+                    'Количество ингредиента не может быть'
+                    'отрицательным или равным нулю')
         return ingredients
 
     def validate_tags(self, tags):

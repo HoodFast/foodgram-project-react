@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
@@ -10,8 +9,6 @@ from api_foodgram.pagination import CustomPagination
 from .serializers import (CreateUserSerializer, PasswordChangeSerializer,
                           SubscriptionCreateSerializer, SubscriptionSerializer,
                           UserSerializer)
-
-User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -29,6 +26,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ('list', 'create'):
             self.permission_classes = (AllowAny,)
         return super(UserViewSet, self).get_permissions()
+
+    def get_queryset(self):
+        return self.request.user
 
 
 class ChangePasswordView(viewsets.ModelViewSet):

@@ -101,9 +101,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['GET', 'POST', 'DELETE'],
+        methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly, ],
-        pagination_class=None,
         url_path='shopping_cart'
     )
     def shopping_cart(self, request, pk):
@@ -118,7 +117,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
         detail=False,
         methods=['GET'],
         url_path='download_shopping_cart',
-        pagination_class=None,
         permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):

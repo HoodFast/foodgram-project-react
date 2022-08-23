@@ -16,6 +16,9 @@ urlpatterns = [
     path('users/set_password/', ChangePasswordView.as_view(
         {'post': 'update'}), name='set_password'
     ),
+    path('users/me/', UserViewSet.as_view(
+        {'get': 'me'}), name='users_get'
+    ),
     path('', include('djoser.urls.authtoken')),
     path('users/subscriptions/', SubscriptionViewSet.as_view(
         {'get': 'list'}), name='subscriptions'

@@ -27,8 +27,10 @@ class UserViewSet(viewsets.ModelViewSet):
             self.permission_classes = (AllowAny,)
         return super(UserViewSet, self).get_permissions()
 
-    def get_queryset(self):
-        return self.request.user
+    def me(self, request, *args, **kwargs):
+        user = self.request.user
+        user_data = UserSerializer(user)
+        return Response(user_data.data)
 
 
 class ChangePasswordView(viewsets.ModelViewSet):
